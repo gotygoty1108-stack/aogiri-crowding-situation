@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>あおぎり祭管理者</title>
+  
+  <!-- PWA・ホーム画面用アイコン設定 -->
+  <meta name="theme-color" content="#e65100">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="あおぎり祭管理者">
+  <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1RcOtQqJAsT9CMIeN917q56DRiUg2eB6L">
+  <link rel="manifest" href="./manifest-admin.json">
+
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; margin: 0; }
+    
+    /* PWAインストールバナー */
+    #pwa-install-banner {
+      background-color: #fff3e0;
+      border: 1px solid #ffe0b2;
+      color: #e65100;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: bold;
+      display: none;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .pwa-close-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #e65100; font-size: 18px; padding: 5px; }
+
+    .card { background: #fff; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h2 { margin-top: 0; padding-top: 10px; }
+    h3 { margin-top: 0; color: #333; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+    
+    .link-group { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+    .link-group span { font-weight: bold; width: 140px; }
+    button.link-btn { padding: 8px 12px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; transition: 0.2s; }
+    button.link-btn:hover { background: #e0e0e0; }
+    
+    .status-group { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-status { flex: 1; padding: 15px 10px; font-size: 16px; border: 2px solid #ccc; border-radius: 8px; cursor: pointer; background: #fff; font-weight: bold; transition: 0.2s; }
+    .btn-status.active-off { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
+    .btn-status.active-on { background-color: #ffebee; color: #c62828; border-color: #c62828; }
+    .btn-status.active-rain { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+    .btn-status.active-enq { background-color: #fff3e0; color: #e67e22; border-color: #e67e22; }
+    .btn-status:not(.active-off):not(.active-on):not(.active-rain):not(.active-enq) { opacity: 0.6; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+    .stat-box { background: #f1f8e9; border: 1px solid #c5e1a5; padding: 15px; border-radius: 8px; text-align: center; }
+    .stat-box.blue { background: #e3f2fd; border-color: #90caf9; }
+    .stat-title { font-size: 13px; color: #555; font-weight: bold; margin-bottom: 5px; }
+    .stat-val { font-size: 24px; color: #2e7d32; font-weight: bold; }
+    .stat-box.blue .stat-val { color: #1565c0; }
+    .link-list { list-style: none; padding: 0; margin: 0; }
+    .link-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 14px; }
+
+    #custom-dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 11000; justify-content: center; align-items: center; }
+    .custom-dialog { background: #fff; padding: 20px; border-radius: 8px; max-width: 320px; width: 85%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .custom-dialog-msg { margin-bottom: 20px; font-size: 15px; color: #333; line-height: 1.5; white-space: pre-wrap; text-align: left; }
+    .custom-dialog-btns { display: flex; justify-content: center; gap: 10px; }
+    .btn-dialog { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .btn-dialog-ok { background: #3498db; color: #fff; }
+    .btn-dialog-cancel { background: #e0e0e0; color: #333; }
+  </style>
+</head>
+<body>
+  <h2>管理画面</h2>
+
+  <!-- PWAインストールバナー -->
+  <div id="pwa-install-banner">
+    <span onclick="promptPwaInstall()" style="cursor: pointer; text-decoration: underline;">📱 管理画面をホーム画面に追加（アプリ化）して使う</span>
+    <span class="pwa-close-btn" onclick="closePwaBanner()">✖</span>
+  </div>
+  
+  <!-- アクセス統計・タップ数表示エリア -->
+  <div class="card">
+    <h3>アクセス統計・タップ数</h3>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-title">スマホ用画面アクセス</div>
+        <div class="stat-val" id="stat-mobile">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">スマホ画面アクセス(端末)</div>
+        <div class="stat-val" id="stat-mobile-unique">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">入力画面アクセス</div>
+        <div class="stat-val" id="stat-input">--</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-title">回答タップ (延べ数)</div>
+        <div class="stat-val" id="stat-enq">--</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-title">回答タップ (端末数)</div>
+        <div class="stat-val" id="stat-enq-unique">--</div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px; background: #fafafa; border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+      <div class="stat-title">リンクタブの各タップ数</div>
+      <ul class="link-list" id="stat-links">
+        <li>読み込み中...</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: right; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+      <button class="link-btn" style="color: #d32f2f; border-color: #ef9a9a; background-color: #ffebee;" onclick="resetStats()">⚠️ 統計とユニーク数をリセット</button>
+      <button class="link-btn" onclick="fetchAdminData()">🔄 最新の統計を読み込む</button>
+    </div>
+  </div>
+
+  <!-- 画面リンクエリア -->
+  <div class="card">
+    <h3>画面リンク</h3>
+    <div class="link-group">
+      <span>🖥️ モニター用</span>
+      <button class="link-btn" onclick="openPage('monitor')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('monitor')">URLコピー</button>
+    </div>
+    <div class="link-group">
+      <span>📱 来場者スマホ用</span>
+      <button class="link-btn" onclick="openPage('mobile')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('mobile')">URLコピー</button>
+    </div>
+    <div class="link-group">
+      <span>⚙️ スタッフ入力用</span>
+      <button class="link-btn" onclick="openPage('input')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('input')">URLコピー</button>
+    </div>
+  </div>
+
+  <!-- 各種設定エリア -->
+  <div class="card">
+    <h3>アンケート表示設定</h3>
+    <p>ONにすると、スマホ用画面の「リンク」タブの一番上にアンケートへのリンクが表示されます。<br><small style="color:#d32f2f;">※事前に「設定シートB5セル」にGoogleフォーム等のURLを入力してください。</small></p>
+    <div class="status-group">
+      <button id="btn-enq-off" class="btn-status" onclick="toggleEnquete(false)">アンケート：OFF</button>
+      <button id="btn-enq-on" class="btn-status" onclick="toggleEnquete(true)">アンケート：ON</button>
+    </div>
+  </div>
+
+  <!-- アンケートリセット機能エリア -->
+  <div class="card" style="border-color: #ffcc80;">
+    <h3 style="color: #e65100; border-bottom-color: #ffe0b2;">アンケートポップアップ制御</h3>
+    <p>来場者のスマホが記憶している「ポップアップを非表示にする状態」を強制的にリセットします。</p>
+    <div class="status-group">
+      <button class="btn-status" onclick="resetEnquete('close')">閉じる状態をリセット<br><small style="font-weight:normal;">(×を押した人へ強制再表示)</small></button>
+      <button class="btn-status" style="border-color:#d32f2f; color:#d32f2f;" onclick="resetEnquete('full')">全リセット<br><small style="font-weight:normal;">(回答済みも全てクリア)</small></button>
+    </div>
+  </div>
+
+  <!-- スタッフ情報リセット機能エリア -->
+  <div class="card" style="border-color: #81c784;">
+    <h3 style="color: #2e7d32; border-bottom-color: #c8e6c9;">スタッフ入力情報リセット</h3>
+    <p>スタッフのスマホに記憶されている「セクション名・名前」を強制的にリセットし、再入力を求めます。</p>
+    <div class="status-group">
+      <button class="btn-status" style="border-color:#388e3c; color:#388e3c;" onclick="resetStaff()">スタッフ情報を全リセット</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>雨天モード設定</h3>
+    <p>ONにすると、中止の項目がブラックアウトし、場所が雨天用に切り替わります。</p>
+    <div class="status-group">
+      <button id="btn-rain-off" class="btn-status" onclick="toggleRain(false)">晴天<br><small>(通常)</small></button>
+      <button id="btn-rain-on" class="btn-status" onclick="toggleRain(true)">雨天モード<br><small>(自動切り替え)</small></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>イベント終了アナウンス設定</h3>
+    <p>ONにすると各画面に「本日のイベントは終了しました」と表示されます。</p>
+    <div class="status-group">
+      <button id="btn-end-off" class="btn-status" onclick="toggleEnd(false)">アナウンス：OFF<br><small>(開催中)</small></button>
+      <button id="btn-end-on" class="btn-status" onclick="toggleEnd(true)">アナウンス：ON<br><small>(イベント終了)</small></button>
+    </div>
+  </div>
+
+  <!-- カスタムダイアログ -->
+  <div id="custom-dialog-overlay">
+    <div class="custom-dialog">
+      <div id="custom-dialog-msg" class="custom-dialog-msg"></div>
+      <div class="custom-dialog-btns">
+        <button id="btn-dialog-cancel" class="btn-dialog btn-dialog-cancel" style="display:none;">キャンセル</button>
+        <button id="btn-dialog-ok" class="btn-dialog btn-dialog-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 暗証番号（PIN）入力用ダイアログ -->
+  <div id="pin-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10500; justify-content: center; align-items: center;">
+    <div class="custom-dialog">
+      <h3 style="margin-top:0; color:#333; font-size:18px; border:none;">暗証番号の入力</h3>
+      <p style="font-size:13px; color:#666; margin-bottom:15px;">管理者用の4桁の暗証番号を入力してください</p>
+      <input type="password" id="pin-input" inputmode="numeric" maxlength="4" style="width:120px; padding:10px; font-size:24px; text-align:center; letter-spacing:8px; border:2px solid #ccc; border-radius:6px; margin-bottom:20px;" placeholder="••••">
+      <div class="custom-dialog-btns">
+        <button id="btn-pin-submit" class="btn-dialog btn-dialog-ok" style="width:100%;">認証する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS用 ホーム画面追加手順ダイアログ -->
+  <div id="ios-pwa-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; position: relative;">
+      <h3 style="margin-top: 0; color: #333; margin-bottom: 15px;">ホーム画面に追加</h3>
+      <p style="text-align: left; font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 20px;">
+        iPhoneの場合は、以下の手順でアプリとして追加できます。<br><br>
+        1. 画面下部の共有ボタン <svg viewBox="0 0 24 24" width="20" height="20" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> をタップ<br>
+        2. メニューから「ホーム画面に追加」 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> を選択
+      </p>
+      <button onclick="document.getElementById('ios-pwa-dialog').style.display='none'" style="padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px;">閉じる</button>
+      <div style="position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 30px;">⬇</div>
+    </div>
+  </div>
+
+  <!-- Android/PC用 ホーム画面追加手順ダイアログ -->
+  <div id="android-pwa-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; position: relative;">
+      <h3 style="margin-top: 0; color: #333; margin-bottom: 15px;">ホーム画面に追加</h3>
+      <p style="text-align: left; font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 20px;">
+        以下の手順でアプリとして追加できます。<br><br>
+        1. ブラウザ右上のメニューボタン <b style="font-size:18px;">⋮</b> をタップ<br>
+        2. 「アプリをインストール」または「ホーム画面に追加」を選択
+      </p>
+      <button onclick="document.getElementById('android-pwa-dialog').style.display='none'" style="padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px;">閉じる</button>
+      <div style="position: absolute; top: -35px; right: 20px; color: #fff; font-size: 30px;">⬆</div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbx0jx16VoWfX93kXV6wR5wWlfoEV-VW6-9zkExnS6eIPj1HcaCHITYX2Rgcc_4suoHTrw/exec";
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW登録失敗:', err));
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!isStandalone && !localStorage.getItem('admin_pwa_banner_closed')) {
+        document.getElementById('pwa-install-banner').style.display = 'block';
+      }
+    });
+
+    function closePwaBanner() {
+      localStorage.setItem('admin_pwa_banner_closed', 'true');
+      document.getElementById('pwa-install-banner').style.display = 'none';
+    }
+
+    function promptPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('pwa-install-banner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else if (isIos()) {
+        document.getElementById('ios-pwa-dialog').style.display = 'flex';
+      } else {
+        document.getElementById('android-pwa-dialog').style.display = 'flex';
+      }
+    }
+
+    let currentData = { isEnded: false, isRainMode: false, isEnqueteOn: false };
+
+    function showMsgBox(msg, isConfirm, onYes, onNo) {
+      const overlay = document.getElementById('custom-dialog-overlay');
+      document.getElementById('custom-dialog-msg').innerText = msg;
+      const btnCancel = document.getElementById('btn-dialog-cancel');
+      const btnOk = document.getElementById('btn-dialog-ok');
+      
+      btnCancel.style.display = isConfirm ? 'block' : 'none';
+      
+      btnOk.onclick = function() {
+        overlay.style.display = 'none';
+        if(onYes) onYes();
+      };
+      btnCancel.onclick = function() {
+        overlay.style.display = 'none';
+        if(onNo) onNo();
+      };
+      overlay.style.display = 'flex';
+    }
+
+    function callGasApi(action, params = {}) {
+      const pin = localStorage.getItem('app_pin') || '';
+      const payload = JSON.stringify({ action, pin, ...params });
+      return fetch(GAS_URL, {
+        method: 'POST',
+        body: payload
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'error') {
+          if (res.message.indexOf('暗証番号') > -1) {
+            localStorage.removeItem('app_pin');
+            showPinDialog();
+          }
+          throw new Error(res.message);
+        }
+        return res.data;
+      });
+    }
+
+    window.onload = function() {
+      if (!localStorage.getItem('app_pin')) {
+        showPinDialog();
+      } else {
+        fetchAdminData();
+      }
+    };
+
+    function showPinDialog() {
+      const overlay = document.getElementById('pin-dialog-overlay');
+      const input = document.getElementById('pin-input');
+      input.value = '';
+      overlay.style.display = 'flex';
+      
+      document.getElementById('btn-pin-submit').onclick = function() {
+        const val = input.value.trim();
+        if (!val) {
+          showMsgBox('暗証番号を入力してください', false);
+          return;
+        }
+        localStorage.setItem('app_pin', val);
+        overlay.style.display = 'none';
+        fetchAdminData();
+      };
+    }
+
+    function fetchAdminData() {
+      callGasApi('getAdminData')
+        .then(updateBtnUI)
+        .catch(err => {
+          showMsgBox(err.message || "データの取得に失敗しました", false);
+        });
+    }
+
+    function getTargetUrl(page) {
+      if (page === 'input') {
+        return new URL('./Input.html', window.location.href).href;
+      }
+      return GAS_URL + "?p=" + page;
+    }
+
+    function openPage(page) {
+      window.open(getTargetUrl(page), "_blank");
+    }
+
+    function copyUrl(page) {
+      const url = getTargetUrl(page);
+      navigator.clipboard.writeText(url).then(() => showMsgBox("URLをコピーしました:\n" + url, false));
+    }
+
+    function toggleEnd(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isEnded: status });
+      callGasApi('setEventEnd', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+    function toggleRain(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isRainMode: status });
+      callGasApi('setRainMode', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+    function toggleEnquete(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isEnqueteOn: status });
+      callGasApi('setEnquete', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+
+    function resetEnquete(type) {
+      const msg = type === 'full' ? "「回答済み」の方を含め、すべての来場者のスマホでポップアップが再表示されるようになります。\n本当によろしいですか？" : "「×(閉じる)」を押して待機中の方のスマホで、強制的にポップアップが再表示されるようになります。\nよろしいですか？";
+      showMsgBox(msg, true, () => {
+        callGasApi('resetEnquetePopup', { type }).then(() => {
+          showMsgBox("リセット信号を送信しました。\n来場者のスマホが数十秒以内に情報を受信し、状態がリセットされます。", false);
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
+        });
+      });
+    }
+
+    function resetStaff() {
+      showMsgBox("現在入力画面を開いているスタッフも含め、次回操作時（画面更新時）に名前の再登録が求められるようになります。\n本当によろしいですか？", true, () => {
+        callGasApi('resetStaffInfo').then(() => {
+          showMsgBox("リセット信号を送信しました。", false);
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
+        });
+      });
+    }
+
+    function resetStats() {
+      showMsgBox("アクセス統計、アンケートタップ数、リンククリック数のすべての数値を「0」に戻し、\nスマホ端末の「ユニーク数カウント」もリセット（全端末で再カウント可能に）します。\n\n※この操作は元に戻せません。本当によろしいですか？", true, () => {
+        callGasApi('resetStatistics').then(() => {
+          showMsgBox("統計データとユニーク数をリセットしました。", false);
+          fetchAdminData();
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
+        });
+      });
+    }
+
+    function updateBtnUI(data) {
+      currentData = data;
+      document.getElementById('btn-end-off').className = "btn-status " + (data.isEnded ? "" : "active-off");
+      document.getElementById('btn-end-on').className = "btn-status " + (data.isEnded ? "active-on" : "");
+      document.getElementById('btn-rain-off').className = "btn-status " + (data.isRainMode ? "" : "active-off");
+      document.getElementById('btn-rain-on').className = "btn-status " + (data.isRainMode ? "active-rain" : "");
+      document.getElementById('btn-enq-off').className = "btn-status " + (data.isEnqueteOn ? "" : "active-off");
+      document.getElementById('btn-enq-on').className = "btn-status " + (data.isEnqueteOn ? "active-enq" : "");
+
+      if(data.stats) {
+        document.getElementById('stat-mobile').innerText = data.stats['スマホ画面アクセス'] || 0;
+        document.getElementById('stat-mobile-unique').innerText = data.stats['スマホ画面アクセス（端末数）'] || 0;
+        document.getElementById('stat-input').innerText = data.stats['スタッフ画面アクセス'] || 0;
+        document.getElementById('stat-enq').innerText = data.stats['アンケート回答タップ'] || 0;
+        document.getElementById('stat-enq-unique').innerText = data.stats['アンケート回答（端末数）'] || 0;
+      }
+      if(data.linkStats) {
+        if(data.linkStats.length === 0) {
+          document.getElementById('stat-links').innerHTML = "<li>リンクの登録がありません</li>";
+        } else {
+          document.getElementById('stat-links').innerHTML = data.linkStats.map(l => `<li><span>${l.title}</span><span style="font-weight:bold;">${l.count} 回</span></li>`).join('');
+        }
+      }
+    }
+  </script>
+</body>
+</html>

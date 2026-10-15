@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>あおぎり祭スタッフ</title>
+  
+  <!-- PWA・ホーム画面用アイコン設定 -->
+  <meta name="theme-color" content="#007bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="あおぎり祭スタッフ">
+  <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1RcOtQqJAsT9CMIeN917q56DRiUg2eB6L">
+  <link rel="manifest" href="./manifest-input.json">
+
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f0f2f5; }
+    
+    /* PWAインストールバナー */
+    #pwa-install-banner {
+      background-color: #e3f2fd;
+      color: #1565c0;
+      padding: 12px 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      display: none;
+      position: relative;
+      border-bottom: 1px solid #bbdefb;
+    }
+    .pwa-close-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 16px; padding: 5px; }
+
+    .header-container { background: #fff; border-bottom: 1px solid #ddd; padding: 15px; display: flex; justify-content: center; align-items: center; position: relative; }
+    .header-container h1 { font-size: 20px; margin: 0; padding: 0; border: none; }
+    .btn-change-staff { position: absolute; right: 15px; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 4px; cursor: pointer; color: #333; font-weight: bold; }
+    
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 10; }
+    .tab-btn { flex: 1; padding: 15px 0; border: none; background: none; font-size: 15px; font-weight: bold; color: #666; cursor: pointer; transition: 0.2s; }
+    .tab-btn.active { color: #007bff; border-bottom: 3px solid #007bff; }
+    .tab-content { display: none; padding: 15px; }
+    .tab-content.active { display: block; }
+    
+    .card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; }
+    .card-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; align-items: center; }
+    .update-time { font-size: 18px; color: #333; font-weight: 900; background: #eee; padding: 4px 8px; border-radius: 4px; }
+
+    .controls-inline { display: flex; align-items: center; gap: 10px; }
+    .input-val { width: 70px; height: 35px; text-align: center; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+    .unit { font-weight: bold; font-size: 14px; color: #333; white-space: nowrap; }
+    .btn-close { flex: 1; padding: 10px; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-close.open { background: #eee; color: #333; }
+    .btn-close.closed { background: #d32f2f; color: white; }
+    .stage-btn { width: 100%; text-align: left; padding: 15px; font-size: 16px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; background: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+    .stage-btn.active { background-color: #e74c3c; color: white; border-color: #e74c3c; }
+    .stage-btn.active-prep { background-color: #f39c12; color: white; border-color: #f39c12; }
+    
+    .btn-toggle { padding: 8px 10px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; background: #fff; color: #555; height: 39px; box-sizing: border-box; }
+    .btn-toggle.active-soldout { background: #7f8c8d; color: white; border-color: #7f8c8d; font-weight: bold; }
+    .shop-item-row { display: flex; flex-direction: column; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+    .shop-item-name { font-size: 15px; font-weight: bold; margin-bottom: 8px; }
+    .shop-item-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .price-input-group { display: flex; align-items: center; gap: 4px; }
+    
+    .blackout-wrapper { position: relative; margin-bottom: 15px; }
+    .blackout-wrapper .card, .blackout-wrapper .stage-btn { margin-bottom: 0; }
+    .blackout-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10; border-radius: 8px; display: flex; justify-content: center; align-items: center; pointer-events: auto; }
+    
+    #custom-dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 11000; justify-content: center; align-items: center; }
+    .custom-dialog { background: #fff; padding: 20px; border-radius: 8px; max-width: 300px; width: 80%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .custom-dialog-msg { margin-bottom: 20px; font-size: 16px; color: #333; line-height: 1.5; white-space: pre-wrap; }
+    .custom-dialog-btns { display: flex; justify-content: center; gap: 10px; }
+    .btn-dialog { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .btn-dialog-ok { background: #3498db; color: #fff; }
+    .btn-dialog-cancel { background: #e0e0e0; color: #333; }
+  </style>
+</head>
+<body>
+  <div id="pwa-install-banner">
+    <span onclick="promptPwaInstall()" style="cursor: pointer; text-decoration: underline;">📱 この画面をホーム画面に追加（アプリ化）して使う</span>
+    <span class="pwa-close-btn" onclick="closePwaBanner()">✖</span>
+  </div>
+
+  <div class="header-container">
+    <h1>セクション状況</h1>
+    <button class="btn-change-staff" onclick="resetMyStaffInfo()">セクション・名前変更</button>
+  </div>
+  
+  <div class="tabs">
+    <button id="tab-btn-attr" class="tab-btn active" onclick="switchTab('attr')">アトラクション</button>
+    <button id="tab-btn-craft" class="tab-btn" onclick="switchTab('craft')">工作</button>
+    <button id="tab-btn-shop" class="tab-btn" onclick="switchTab('shop')">模擬店</button>
+    <button id="tab-btn-stage" class="tab-btn" onclick="switchTab('stage')">ステージ</button>
+  </div>
+  
+  <div id="tab-attr" class="tab-content active"></div>
+  <div id="tab-craft" class="tab-content"></div>
+  <div id="tab-shop" class="tab-content"></div>
+  <div id="tab-stage" class="tab-content"></div>
+
+  <!-- カスタムダイアログ -->
+  <div id="custom-dialog-overlay">
+    <div class="custom-dialog">
+      <div id="custom-dialog-msg" class="custom-dialog-msg"></div>
+      <div class="custom-dialog-btns">
+        <button id="btn-dialog-cancel" class="btn-dialog btn-dialog-cancel" style="display:none;">キャンセル</button>
+        <button id="btn-dialog-ok" class="btn-dialog btn-dialog-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 暗証番号（PIN）入力用ダイアログ -->
+  <div id="pin-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10500; justify-content: center; align-items: center;">
+    <div class="custom-dialog">
+      <h3 style="margin-top:0; color:#333; font-size:18px;">暗証番号の入力</h3>
+      <p style="font-size:13px; color:#666; margin-bottom:15px;">スタッフ用の4桁の暗証番号を入力してください</p>
+      <input type="password" id="pin-input" inputmode="numeric" maxlength="4" style="width:120px; padding:10px; font-size:24px; text-align:center; letter-spacing:8px; border:2px solid #ccc; border-radius:6px; margin-bottom:20px;" placeholder="••••">
+      <div class="custom-dialog-btns">
+        <button id="btn-pin-submit" class="btn-dialog btn-dialog-ok" style="width:100%;">認証する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- スタッフ登録用ダイアログ -->
+  <div id="staff-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;">
+    <div class="custom-dialog" style="text-align: left;">
+      <h3 style="margin-top:0; color:#333; text-align:center; font-size:18px;">スタッフ情報登録</h3>
+      <div style="margin-bottom: 15px;">
+        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">セクション名</label>
+        <select id="staff-section" style="width:100%; padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
+        </select>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">担当者名（ニックネーム可）</label>
+        <input type="text" id="staff-name" style="width:100%; padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;" placeholder="名前を入力">
+      </div>
+      <div class="custom-dialog-btns">
+        <button id="btn-staff-register" class="btn-dialog btn-dialog-ok" style="width:100%;">登録して開始</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS用 ホーム画面追加手順ダイアログ -->
+  <div id="ios-pwa-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; position: relative;">
+      <h3 style="margin-top: 0; color: #333; margin-bottom: 15px;">ホーム画面に追加</h3>
+      <p style="text-align: left; font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 20px;">
+        iPhoneの場合は、以下の手順でアプリとして追加できます。<br><br>
+        1. 画面下部の共有ボタン <svg viewBox="0 0 24 24" width="20" height="20" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> をタップ<br>
+        2. メニューから「ホーム画面に追加」 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 3px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> を選択
+      </p>
+      <button onclick="document.getElementById('ios-pwa-dialog').style.display='none'" style="padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px;">閉じる</button>
+      <div style="position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 30px;">⬇</div>
+    </div>
+  </div>
+
+  <!-- Android/PC用 ホーム画面追加手順ダイアログ -->
+  <div id="android-pwa-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 25px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; position: relative;">
+      <h3 style="margin-top: 0; color: #333; margin-bottom: 15px;">ホーム画面に追加</h3>
+      <p style="text-align: left; font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 20px;">
+        以下の手順でアプリとして追加できます。<br><br>
+        1. ブラウザ右上のメニューボタン <b style="font-size:18px;">⋮</b> をタップ<br>
+        2. 「アプリをインストール」または「ホーム画面に追加」を選択
+      </p>
+      <button onclick="document.getElementById('android-pwa-dialog').style.display='none'" style="padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px;">閉じる</button>
+      <div style="position: absolute; top: -35px; right: 20px; color: #fff; font-size: 30px;">⬆</div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbx0jx16VoWfX93kXV6wR5wWlfoEV-VW6-9zkExnS6eIPj1HcaCHITYX2Rgcc_4suoHTrw/exec";
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW登録失敗:', err));
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!isStandalone && !localStorage.getItem('input_pwa_banner_closed')) {
+        document.getElementById('pwa-install-banner').style.display = 'block';
+      }
+    });
+
+    function closePwaBanner() {
+      localStorage.setItem('input_pwa_banner_closed', 'true');
+      document.getElementById('pwa-install-banner').style.display = 'none';
+    }
+
+    function promptPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('pwa-install-banner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else if (isIos()) {
+        document.getElementById('ios-pwa-dialog').style.display = 'flex';
+      } else {
+        document.getElementById('android-pwa-dialog').style.display = 'flex';
+      }
+    }
+
+    let localData = { attractions: [], crafts: [], stages: [], shops: [], isRainMode: false };
+
+    function callGasApi(action, params = {}) {
+      const pin = localStorage.getItem('app_pin') || '';
+      const payload = JSON.stringify({ action, pin, ...params });
+      return fetch(GAS_URL, {
+        method: 'POST',
+        body: payload
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'error') {
+          if (res.message.indexOf('暗証番号') > -1) {
+            localStorage.removeItem('app_pin');
+            showPinDialog();
+          }
+          throw new Error(res.message);
+        }
+        return res.data;
+      });
+    }
+
+    window.onload = function() {
+      if (!localStorage.getItem('app_pin')) {
+        showPinDialog();
+      } else {
+        initLoadData();
+      }
+    };
+
+    function showPinDialog() {
+      const overlay = document.getElementById('pin-dialog-overlay');
+      const input = document.getElementById('pin-input');
+      input.value = '';
+      overlay.style.display = 'flex';
+      
+      document.getElementById('btn-pin-submit').onclick = function() {
+        const val = input.value.trim();
+        if (!val) {
+          showMsgBox('暗証番号を入力してください', false);
+          return;
+        }
+        localStorage.setItem('app_pin', val);
+        overlay.style.display = 'none';
+        initLoadData();
+      };
+    }
+
+    function initLoadData() {
+      document.getElementById('tab-attr').innerHTML = "読み込み中...";
+      callGasApi('getMasterData', { isInit: true })
+        .then(data => {
+          localData = data;
+          checkStaffRegistration();
+          renderAll();
+        })
+        .catch(err => {
+          document.getElementById('tab-attr').innerHTML = "データの読み込みに失敗しました。";
+          showMsgBox(err.message || '通信エラーが発生しました', false);
+        });
+    }
+
+    function resetMyStaffInfo() {
+      showMsgBox("現在の担当者情報（セクションと名前）をリセットして、再登録しますか？", true, 
+        () => {
+          localStorage.removeItem('staff_section');
+          localStorage.removeItem('staff_name');
+          localStorage.removeItem('staff_registered_time');
+          checkStaffRegistration();
+        }
+      );
+    }
+
+    function checkStaffRegistration() {
+      const resetTime = localData.staffResetTime || 0;
+      const registeredTime = Number(localStorage.getItem('staff_registered_time')) || 0;
+      
+      if (resetTime > registeredTime) {
+        localStorage.removeItem('staff_section');
+        localStorage.removeItem('staff_name');
+      }
+
+      if (!localStorage.getItem('staff_name') || !localStorage.getItem('staff_section')) {
+        const sel = document.getElementById('staff-section');
+        document.getElementById('staff-name').value = ''; 
+        sel.innerHTML = '<option value="">選択してください</option>' + (localData.staffSections || []).map(s => `<option value="${s}">${s}</option>`).join('');
+        
+        document.getElementById('staff-dialog-overlay').style.display = 'flex';
+        
+        document.getElementById('btn-staff-register').onclick = function() {
+          const section = document.getElementById('staff-section').value;
+          const name = document.getElementById('staff-name').value.trim();
+          if (!section || !name) {
+            showMsgBox('セクションと名前を入力してください', false);
+            return;
+          }
+          localStorage.setItem('staff_section', section);
+          localStorage.setItem('staff_name', name);
+          localStorage.setItem('staff_registered_time', Date.now());
+          document.getElementById('staff-dialog-overlay').style.display = 'none';
+          
+          callGasApi('registerStaff', { section, name }).catch(() => {});
+        };
+      }
+    }
+
+    function getStaffInfo() {
+      const sec = localStorage.getItem('staff_section') || '不明';
+      const name = localStorage.getItem('staff_name') || '不明';
+      return `【${sec}/${name}】`;
+    }
+
+    function showMsgBox(msg, isConfirm, onYes, onNo) {
+      const overlay = document.getElementById('custom-dialog-overlay');
+      document.getElementById('custom-dialog-msg').innerText = msg;
+      const btnCancel = document.getElementById('btn-dialog-cancel');
+      const btnOk = document.getElementById('btn-dialog-ok');
+      
+      btnCancel.style.display = isConfirm ? 'block' : 'none';
+      
+      btnOk.onclick = function() {
+        overlay.style.display = 'none';
+        if(onYes) onYes();
+      };
+      btnCancel.onclick = function() {
+        overlay.style.display = 'none';
+        if(onNo) onNo();
+      };
+      overlay.style.display = 'flex';
+    }
+
+    function switchTab(tabId) {
+      ['attr', 'craft', 'shop', 'stage'].forEach(id => {
+        document.getElementById('tab-btn-' + id).classList.remove('active');
+        document.getElementById('tab-' + id).classList.remove('active');
+      });
+      document.getElementById('tab-btn-' + tabId).classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    function getOverlay(isCanceled) {
+      if (localData.isRainMode && isCanceled) return `<div class="blackout-overlay"></div>`;
+      return '';
+    }
+    
+    function getUpdateStr(timeStr) {
+      return timeStr ? `<span class="update-time">🕒${timeStr}</span>` : '';
+    }
+
+    function renderAll() { renderAttr(); renderCraft(); renderShop(); renderStage(); }
+
+    function renderAttr() {
+      document.getElementById('tab-attr').innerHTML = localData.attractions.map((a, i) => `
+        <div class="blackout-wrapper">
+          ${getOverlay(a.isRainCanceled)}
+          <div class="card">
+            <div class="card-title"><span>${a.category} - ${a.name}</span> ${getUpdateStr(a.updatedAt)}</div>
+            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="controls-inline">
+                <input class="input-val" type="text" value="${a.wait}" onchange="setVal('attraction', ${i}, 'wait', this.value)">
+                <span class="unit">分待ち</span>
+                <button class="btn-close ${a.isClosed ? 'closed' : 'open'}" onclick="toggleClose('attraction', ${i})">${a.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
+              </div>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 0)">0分(空)</button>
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 5)">5分</button>
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 10)">10分</button>
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 15)">15分</button>
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 20)">20分</button>
+                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 30)">30分</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCraft() {
+      document.getElementById('tab-craft').innerHTML = localData.crafts.map((c, i) => {
+        let timesHtml = c.times.map((t, tIndex) => {
+          const isCurrent = t.status === '開催中';
+          const isPreparing = t.status === '準備中';
+          return `
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button class="stage-btn ${isCurrent ? 'active' : ''}" style="margin-bottom: 0;" onclick="toggleCraftTime(${i}, ${tIndex}, '開催中')">
+              <span>${t.time}</span>
+              ${isCurrent ? '<span>◀ 開催中</span>' : ''}
+            </button>
+            <button class="stage-btn ${isPreparing ? 'active-prep' : ''}" style="margin-bottom: 0; width: auto; padding: 15px; white-space: nowrap; flex-shrink: 0;" onclick="toggleCraftTime(${i}, ${tIndex}, '準備中')">
+              ${isPreparing ? '準備中(解除)' : '準備中'}
+            </button>
+          </div>
+          `;
+        }).join('');
+
+        return `
+        <div class="blackout-wrapper">
+          ${getOverlay(c.isRainCanceled)}
+          <div class="card">
+            <div class="card-title"><span>${c.name}</span> ${getUpdateStr(c.updatedAt)}</div>
+            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+              <div class="controls-inline">
+                <input class="input-val" type="text" value="${c.wait}" onchange="setVal('craft', ${i}, 'wait', this.value)">
+                <span class="unit">分待ち</span>
+                <button class="btn-close ${c.isClosed ? 'closed' : 'open'}" onclick="toggleClose('craft', ${i})">${c.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
+              </div>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 0)">0分(空)</button>
+                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 15)">15分</button>
+                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 20)">20分</button>
+                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 30)">30分</button>
+                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 40)">40分</button>
+              </div>
+            </div>
+            ${timesHtml ? `<div style="border-top:1px solid #eee; padding-top:15px;">${timesHtml}</div>` : ''}
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    function renderShop() {
+      document.getElementById('tab-shop').innerHTML = localData.shops.map((shop, sIndex) => {
+        let itemsHtml = shop.items.map((item, iIndex) => {
+          const regVal = item.regularPrice;
+          const regAmt = item.regularAmount;
+          const saleAmt = item.saleAmount;
+          const u = item.unit;
+          return `
+          <div class="shop-item-row">
+            <div class="shop-item-name">${item.name}</div>
+            <div class="shop-item-controls">
+              <div class="price-input-group">
+                <span style="font-size:12px; color:#555;">定価</span>
+                <input class="input-val" style="width:60px;" type="text" value="${regVal}" placeholder="円" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'regularPrice', this.value)">
+                <span style="font-size:12px; color:#555;">円 /</span>
+                <input class="input-val" style="width:45px;" type="text" value="${regAmt}" placeholder="${u}" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'regularAmount', this.value)">
+                <span style="font-size:12px; color:#555;">${u}</span>
+              </div>
+              <div class="price-input-group">
+                <span style="font-size:12px; color:#e74c3c; font-weight:bold;">セール</span>
+                <input class="input-val" style="width:45px; color:#e74c3c; border-color:#e74c3c;" type="text" value="${saleAmt}" placeholder="${u}" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'saleAmount', this.value)">
+                <span style="font-size:12px; color:#e74c3c; font-weight:bold;">${u}</span>
+              </div>
+              <button class="btn-toggle ${item.isSoldOut ? 'active-soldout' : ''}" onclick="updateShopSoldOut(${sIndex}, ${iIndex}, ${!item.isSoldOut})">売切</button>
+            </div>
+          </div>
+        `}).join('');
+        return `
+          <div class="blackout-wrapper">
+            ${getOverlay(shop.isRainCanceled)}
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div class="card-title" style="margin-bottom:0; font-size:18px;">${shop.name} ${getUpdateStr(shop.updatedAt)}</div>
+                <button class="btn-close ${shop.isClosed ? 'closed' : 'open'}" style="width:auto; padding:8px 12px;" onclick="toggleShopClose(${sIndex})">${shop.isClosed ? '店舗受付終了(解除)' : '店舗を受付終了'}</button>
+              </div>
+              <div style="border-top:1px solid #eee; padding-top:15px;">${itemsHtml}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderStage() {
+      document.getElementById('tab-stage').innerHTML = localData.stages.map((s, i) => `
+        <div class="blackout-wrapper">
+          ${getOverlay(s.isRainCanceled)}
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button class="stage-btn ${s.isCurrent ? 'active' : ''}" style="margin-bottom: 0;" onclick="toggleStage(${i}, 'current')">
+              <span>${s.time} | ${s.name} ${getUpdateStr(s.updatedAt)}</span>
+              ${s.isCurrent ? '<span>◀ 演奏中</span>' : ''}
+            </button>
+            <button class="stage-btn ${s.isPreparing ? 'active-prep' : ''}" style="margin-bottom: 0; width: auto; padding: 15px; white-space: nowrap; flex-shrink: 0;" onclick="toggleStage(${i}, 'preparing')">
+              ${s.isPreparing ? '準備中(解除)' : '準備中'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handlePriceChange(sIndex, iIndex, key, val) {
+      const shop = localData.shops[sIndex]; const item = shop.items[iIndex];
+      let finalVal = String(val).trim();
+      if (finalVal !== '-') {
+        finalVal = finalVal === '' ? 0 : Number(finalVal);
+        if (isNaN(finalVal) || finalVal < 0) finalVal = 0;
+      }
+
+      if (key === 'saleAmount' && finalVal > 0 && finalVal !== '-' && (!item.regularPrice || item.regularPrice <= 0 || item.regularPrice === '-' || !item.regularAmount || item.regularAmount <= 0 || item.regularAmount === '-')) {
+        showMsgBox("定価と定価個数を入力してください", false, () => { renderShop(); }); 
+        return;
+      }
+      if (key === 'regularPrice' && finalVal === 0) {
+        item.regularPrice = 0; item.regularAmount = 0; item.saleAmount = 0; sendShopData(shop.name, item.name, { regularPrice: 0, regularAmount: 0, saleAmount: 0 });
+      } else {
+        item[key] = finalVal; let dataObj = {}; dataObj[key] = finalVal; sendShopData(shop.name, item.name, dataObj);
+      }
+      renderShop();
+    }
+    
+    function updateShopSoldOut(sIndex, iIndex, isSoldOutVal) {
+      const shop = localData.shops[sIndex]; const item = shop.items[iIndex]; item.isSoldOut = isSoldOutVal; renderShop(); sendShopData(shop.name, item.name, { isSoldOut: isSoldOutVal });
+    }
+    
+    function sendShopData(shopName, itemName, dataObj) {
+      callGasApi('updateShopData', { shopName, itemName, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { showMsgBox('エラーが発生しました', false); });
+    }
+    
+    function toggleShopClose(sIndex) {
+      const shop = localData.shops[sIndex]; const oldVal = shop.isClosed; shop.isClosed = !oldVal; renderShop();
+      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isClosed: shop.isClosed }, staffInfo: getStaffInfo() })
+        .catch(() => { shop.isClosed = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
+    }
+    
+    function setVal(type, index, key, newVal) {
+      let list = type === 'attraction' ? localData.attractions : localData.crafts;
+      
+      let finalVal = String(newVal).trim();
+      if (finalVal !== '-') {
+        finalVal = Number(finalVal);
+        if (isNaN(finalVal) || finalVal < 0) finalVal = 0;
+      }
+      
+      const oldVal = list[index][key]; 
+      list[index][key] = finalVal; 
+      type === 'attraction' ? renderAttr() : renderCraft();
+      
+      let dataObj = {}; dataObj[key] = finalVal;
+      callGasApi('updateDataObj', { type, name: list[index].name, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { 
+          list[index][key] = oldVal; 
+          type === 'attraction' ? renderAttr() : renderCraft(); 
+          showMsgBox('エラーが発生しました', false); 
+        });
+    }
+    
+    function toggleClose(type, index) {
+      let list = type === 'attraction' ? localData.attractions : localData.crafts;
+      const oldVal = list[index].isClosed; list[index].isClosed = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
+      callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isClosed: !oldVal }, staffInfo: getStaffInfo() })
+        .catch(() => { list[index].isClosed = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
+    }
+    
+    function toggleStage(index, type) {
+      const oldStages = JSON.parse(JSON.stringify(localData.stages));
+      const targetKey = type === 'current' ? 'isCurrent' : 'isPreparing';
+      const targetState = !localData.stages[index][targetKey];
+      
+      if (targetState) {
+        localData.stages.forEach(s => { s.isCurrent = false; s.isPreparing = false; });
+        localData.stages[index][targetKey] = true;
+      } else {
+        localData.stages[index][targetKey] = false;
+      }
+      renderStage();
+
+      callGasApi('toggleStageState', { name: localData.stages[index].name, type, staffInfo: getStaffInfo() })
+        .catch(() => { 
+          localData.stages = oldStages; 
+          renderStage(); 
+          showMsgBox('エラーが発生しました', false); 
+        });
+    }
+
+    function toggleCraftTime(cIndex, tIndex, type) {
+      const oldCrafts = JSON.parse(JSON.stringify(localData.crafts));
+      const targetTime = localData.crafts[cIndex].times[tIndex];
+      const currentState = targetTime.status;
+      const newState = currentState === type ? '' : type;
+
+      localData.crafts[cIndex].times.forEach(t => t.status = '');
+      targetTime.status = newState;
+      
+      renderCraft();
+
+      callGasApi('toggleCraftTimeState', { craftName: localData.crafts[cIndex].name, timeIndex: tIndex, targetStatus: newState, staffInfo: getStaffInfo() })
+        .catch(() => { 
+          localData.crafts = oldCrafts; 
+          renderCraft(); 
+          showMsgBox('エラーが発生しました', false); 
+        });
+    }
+  </script>
+</body>
+</html>

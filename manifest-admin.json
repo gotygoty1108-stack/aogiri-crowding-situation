@@ -1,0 +1,22 @@
+{
+  "name": "あおぎり祭管理者",
+  "short_name": "あおぎり祭管理者",
+  "start_url": "./Admin.html",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#e65100",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1RcOtQqJAsT9CMIeN917q56DRiUg2eB6L",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1RcOtQqJAsT9CMIeN917q56DRiUg2eB6L",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
