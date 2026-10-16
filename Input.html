@@ -3,71 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>あおぎり祭スタッフ</title>
+  <title>あおぎり祭管理者</title>
   
   <!-- PWA・ホーム画面用アイコン設定 -->
-  <meta name="theme-color" content="#007bff">
+  <meta name="theme-color" content="#e65100">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="あおぎり祭スタッフ">
+  <meta name="apple-mobile-web-app-title" content="あおぎり祭管理者">
   <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1RcOtQqJAsT9CMIeN917q56DRiUg2eB6L">
-  <link rel="manifest" href="./manifest-input.json">
+  <link rel="manifest" href="./manifest-admin.json">
 
   <style>
-    body { font-family: sans-serif; margin: 0; background: #f0f2f5; }
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; margin: 0; }
     
     /* PWAインストールバナー */
     #pwa-install-banner {
-      background-color: #e3f2fd;
-      color: #1565c0;
-      padding: 12px 15px;
+      background-color: #fff3e0;
+      border: 1px solid #ffe0b2;
+      color: #e65100;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
       text-align: center;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       display: none;
       position: relative;
-      border-bottom: 1px solid #bbdefb;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .pwa-close-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 16px; padding: 5px; }
+    .pwa-close-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #e65100; font-size: 18px; padding: 5px; }
 
-    .header-container { background: #fff; border-bottom: 1px solid #ddd; padding: 15px; display: flex; justify-content: center; align-items: center; position: relative; }
-    .header-container h1 { font-size: 20px; margin: 0; padding: 0; border: none; }
-    .btn-change-staff { position: absolute; right: 15px; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 4px; cursor: pointer; color: #333; font-weight: bold; }
+    .card { background: #fff; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h2 { margin-top: 0; padding-top: 10px; }
+    h3 { margin-top: 0; color: #333; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
     
-    .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 10; }
-    .tab-btn { flex: 1; padding: 15px 0; border: none; background: none; font-size: 15px; font-weight: bold; color: #666; cursor: pointer; transition: 0.2s; }
-    .tab-btn.active { color: #007bff; border-bottom: 3px solid #007bff; }
-    .tab-content { display: none; padding: 15px; }
-    .tab-content.active { display: block; }
+    .link-group { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+    .link-group span { font-weight: bold; width: 140px; }
+    button.link-btn { padding: 8px 12px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; transition: 0.2s; }
+    button.link-btn:hover { background: #e0e0e0; }
     
-    .card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; }
-    .card-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; align-items: center; }
-    .update-time { font-size: 18px; color: #333; font-weight: 900; background: #eee; padding: 4px 8px; border-radius: 4px; }
+    .status-group { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-status { flex: 1; padding: 15px 10px; font-size: 16px; border: 2px solid #ccc; border-radius: 8px; cursor: pointer; background: #fff; font-weight: bold; transition: 0.2s; }
+    .btn-status.active-off { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
+    .btn-status.active-on { background-color: #ffebee; color: #c62828; border-color: #c62828; }
+    .btn-status.active-rain { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+    .btn-status.active-enq { background-color: #fff3e0; color: #e67e22; border-color: #e67e22; }
+    .btn-status:not(.active-off):not(.active-on):not(.active-rain):not(.active-enq) { opacity: 0.6; }
 
-    .controls-inline { display: flex; align-items: center; gap: 10px; }
-    .input-val { width: 70px; height: 35px; text-align: center; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-    .unit { font-weight: bold; font-size: 14px; color: #333; white-space: nowrap; }
-    .btn-close { flex: 1; padding: 10px; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
-    .btn-close.open { background: #eee; color: #333; }
-    .btn-close.closed { background: #d32f2f; color: white; }
-    .stage-btn { width: 100%; text-align: left; padding: 15px; font-size: 16px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; background: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
-    .stage-btn.active { background-color: #e74c3c; color: white; border-color: #e74c3c; }
-    .stage-btn.active-prep { background-color: #f39c12; color: white; border-color: #f39c12; }
-    
-    .btn-toggle { padding: 8px 10px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; background: #fff; color: #555; height: 39px; box-sizing: border-box; }
-    .btn-toggle.active-soldout { background: #7f8c8d; color: white; border-color: #7f8c8d; font-weight: bold; }
-    .shop-item-row { display: flex; flex-direction: column; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-    .shop-item-name { font-size: 15px; font-weight: bold; margin-bottom: 8px; }
-    .shop-item-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .price-input-group { display: flex; align-items: center; gap: 4px; }
-    
-    .blackout-wrapper { position: relative; margin-bottom: 15px; }
-    .blackout-wrapper .card, .blackout-wrapper .stage-btn { margin-bottom: 0; }
-    .blackout-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10; border-radius: 8px; display: flex; justify-content: center; align-items: center; pointer-events: auto; }
-    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+    .stat-box { background: #f1f8e9; border: 1px solid #c5e1a5; padding: 15px; border-radius: 8px; text-align: center; }
+    .stat-box.blue { background: #e3f2fd; border-color: #90caf9; }
+    .stat-title { font-size: 13px; color: #555; font-weight: bold; margin-bottom: 5px; }
+    .stat-val { font-size: 24px; color: #2e7d32; font-weight: bold; }
+    .stat-box.blue .stat-val { color: #1565c0; }
+    .link-list { list-style: none; padding: 0; margin: 0; }
+    .link-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 14px; }
+
     #custom-dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 11000; justify-content: center; align-items: center; }
-    .custom-dialog { background: #fff; padding: 20px; border-radius: 8px; max-width: 300px; width: 80%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .custom-dialog-msg { margin-bottom: 20px; font-size: 16px; color: #333; line-height: 1.5; white-space: pre-wrap; }
+    .custom-dialog { background: #fff; padding: 20px; border-radius: 8px; max-width: 320px; width: 85%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .custom-dialog-msg { margin-bottom: 20px; font-size: 15px; color: #333; line-height: 1.5; white-space: pre-wrap; text-align: left; }
     .custom-dialog-btns { display: flex; justify-content: center; gap: 10px; }
     .btn-dialog { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
     .btn-dialog-ok { background: #3498db; color: #fff; }
@@ -75,27 +69,119 @@
   </style>
 </head>
 <body>
+  <h2>管理画面</h2>
+
+  <!-- PWAインストールバナー -->
   <div id="pwa-install-banner">
-    <span onclick="promptPwaInstall()" style="cursor: pointer; text-decoration: underline;">📱 この画面をホーム画面に追加（アプリ化）して使う</span>
+    <span onclick="promptPwaInstall()" style="cursor: pointer; text-decoration: underline;">📱 管理画面をホーム画面に追加（アプリ化）して使う</span>
     <span class="pwa-close-btn" onclick="closePwaBanner()">✖</span>
   </div>
+  
+  <!-- アクセス統計・タップ数表示エリア -->
+  <div class="card">
+    <h3>アクセス統計・タップ数</h3>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-title">スマホ用画面アクセス</div>
+        <div class="stat-val" id="stat-mobile">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">スマホ画面アクセス(端末)</div>
+        <div class="stat-val" id="stat-mobile-unique">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">入力画面アクセス</div>
+        <div class="stat-val" id="stat-input">--</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-title">回答タップ (延べ数)</div>
+        <div class="stat-val" id="stat-enq">--</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="stat-title">回答タップ (端末数)</div>
+        <div class="stat-val" id="stat-enq-unique">--</div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px; background: #fafafa; border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+      <div class="stat-title">リンクタブの各タップ数</div>
+      <ul class="link-list" id="stat-links">
+        <li>読み込み中...</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: right; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+      <button class="link-btn" style="color: #d32f2f; border-color: #ef9a9a; background-color: #ffebee;" onclick="resetStats()">⚠️ 統計とユニーク数をリセット</button>
+      <button class="link-btn" onclick="fetchAdminData()">🔄 最新の統計を読み込む</button>
+    </div>
+  </div>
 
-  <div class="header-container">
-    <h1>セクション状況</h1>
-    <button class="btn-change-staff" onclick="resetMyStaffInfo()">セクション・名前変更</button>
+  <!-- 画面リンクエリア -->
+  <div class="card">
+    <h3>画面リンク</h3>
+    <div class="link-group">
+      <span>🖥️ モニター用</span>
+      <button class="link-btn" onclick="openPage('monitor')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('monitor')">URLコピー</button>
+    </div>
+    <div class="link-group">
+      <span>📱 来場者スマホ用</span>
+      <button class="link-btn" onclick="openPage('mobile')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('mobile')">URLコピー</button>
+    </div>
+    <div class="link-group">
+      <span>⚙️ スタッフ入力用</span>
+      <button class="link-btn" onclick="openPage('input')">画面を開く</button>
+      <button class="link-btn" onclick="copyUrl('input')">URLコピー</button>
+    </div>
   </div>
-  
-  <div class="tabs">
-    <button id="tab-btn-attr" class="tab-btn active" onclick="switchTab('attr')">アトラクション</button>
-    <button id="tab-btn-craft" class="tab-btn" onclick="switchTab('craft')">工作</button>
-    <button id="tab-btn-shop" class="tab-btn" onclick="switchTab('shop')">模擬店</button>
-    <button id="tab-btn-stage" class="tab-btn" onclick="switchTab('stage')">ステージ</button>
+
+  <!-- 各種設定エリア -->
+  <div class="card">
+    <h3>アンケート表示設定</h3>
+    <p>ONにすると、スマホ用画面の「リンク」タブの一番上にアンケートへのリンクが表示されます。<br><small style="color:#d32f2f;">※事前に「設定シートB5セル」にGoogleフォーム等のURLを入力してください。</small></p>
+    <div class="status-group">
+      <button id="btn-enq-off" class="btn-status" onclick="toggleEnquete(false)">アンケート：OFF</button>
+      <button id="btn-enq-on" class="btn-status" onclick="toggleEnquete(true)">アンケート：ON</button>
+    </div>
   </div>
-  
-  <div id="tab-attr" class="tab-content active"></div>
-  <div id="tab-craft" class="tab-content"></div>
-  <div id="tab-shop" class="tab-content"></div>
-  <div id="tab-stage" class="tab-content"></div>
+
+  <!-- アンケートリセット機能エリア -->
+  <div class="card" style="border-color: #ffcc80;">
+    <h3 style="color: #e65100; border-bottom-color: #ffe0b2;">アンケートポップアップ制御</h3>
+    <p>来場者のスマホが記憶している「ポップアップを非表示にする状態」を強制的にリセットします。</p>
+    <div class="status-group">
+      <button class="btn-status" onclick="resetEnquete('close')">閉じる状態をリセット<br><small style="font-weight:normal;">(×を押した人へ強制再表示)</small></button>
+      <button class="btn-status" style="border-color:#d32f2f; color:#d32f2f;" onclick="resetEnquete('full')">全リセット<br><small style="font-weight:normal;">(回答済みも全てクリア)</small></button>
+    </div>
+  </div>
+
+  <!-- スタッフ情報リセット機能エリア -->
+  <div class="card" style="border-color: #81c784;">
+    <h3 style="color: #2e7d32; border-bottom-color: #c8e6c9;">スタッフ入力情報リセット</h3>
+    <p>スタッフのスマホに記憶されている「セクション名・名前」を強制的にリセットし、再入力を求めます。</p>
+    <div class="status-group">
+      <button class="btn-status" style="border-color:#388e3c; color:#388e3c;" onclick="resetStaff()">スタッフ情報を全リセット</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>雨天モード設定</h3>
+    <p>ONにすると、中止の項目がブラックアウトし、場所が雨天用に切り替わります。</p>
+    <div class="status-group">
+      <button id="btn-rain-off" class="btn-status" onclick="toggleRain(false)">晴天<br><small>(通常)</small></button>
+      <button id="btn-rain-on" class="btn-status" onclick="toggleRain(true)">雨天モード<br><small>(自動切り替え)</small></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>イベント終了アナウンス設定</h3>
+    <p>ONにすると各画面に「本日のイベントは終了しました」と表示されます。</p>
+    <div class="status-group">
+      <button id="btn-end-off" class="btn-status" onclick="toggleEnd(false)">アナウンス：OFF<br><small>(開催中)</small></button>
+      <button id="btn-end-on" class="btn-status" onclick="toggleEnd(true)">アナウンス：ON<br><small>(イベント終了)</small></button>
+    </div>
+  </div>
 
   <!-- カスタムダイアログ -->
   <div id="custom-dialog-overlay">
@@ -111,30 +197,11 @@
   <!-- 暗証番号（PIN）入力用ダイアログ -->
   <div id="pin-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10500; justify-content: center; align-items: center;">
     <div class="custom-dialog">
-      <h3 style="margin-top:0; color:#333; font-size:18px;">暗証番号の入力</h3>
-      <p style="font-size:13px; color:#666; margin-bottom:15px;">スタッフ用の4桁の暗証番号を入力してください</p>
+      <h3 style="margin-top:0; color:#333; font-size:18px; border:none;">暗証番号の入力</h3>
+      <p style="font-size:13px; color:#666; margin-bottom:15px;">管理者用の4桁の暗証番号を入力してください</p>
       <input type="password" id="pin-input" inputmode="numeric" maxlength="4" style="width:120px; padding:10px; font-size:24px; text-align:center; letter-spacing:8px; border:2px solid #ccc; border-radius:6px; margin-bottom:20px;" placeholder="••••">
       <div class="custom-dialog-btns">
         <button id="btn-pin-submit" class="btn-dialog btn-dialog-ok" style="width:100%;">認証する</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- スタッフ登録用ダイアログ -->
-  <div id="staff-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;">
-    <div class="custom-dialog" style="text-align: left;">
-      <h3 style="margin-top:0; color:#333; text-align:center; font-size:18px;">スタッフ情報登録</h3>
-      <div style="margin-bottom: 15px;">
-        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">セクション名</label>
-        <select id="staff-section" style="width:100%; padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
-        </select>
-      </div>
-      <div style="margin-bottom: 20px;">
-        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">担当者名</label>
-        <input type="text" id="staff-name" style="width:100%; padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;" placeholder="名前を入力">
-      </div>
-      <div class="custom-dialog-btns">
-        <button id="btn-staff-register" class="btn-dialog btn-dialog-ok" style="width:100%;">登録して開始</button>
       </div>
     </div>
   </div>
@@ -184,13 +251,13 @@
     const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (!isStandalone && !localStorage.getItem('input_pwa_banner_closed')) {
+      if (!isStandalone && !localStorage.getItem('admin_pwa_banner_closed')) {
         document.getElementById('pwa-install-banner').style.display = 'block';
       }
     });
 
     function closePwaBanner() {
-      localStorage.setItem('input_pwa_banner_closed', 'true');
+      localStorage.setItem('admin_pwa_banner_closed', 'true');
       document.getElementById('pwa-install-banner').style.display = 'none';
     }
 
@@ -210,117 +277,7 @@
       }
     }
 
-    let localData = { attractions: [], crafts: [], stages: [], shops: [], isRainMode: false };
-
-    function callGasApi(action, params = {}) {
-      const pin = localStorage.getItem('app_pin') || '';
-      const payload = JSON.stringify({ action, pin, ...params });
-      return fetch(GAS_URL, {
-        method: 'POST',
-        body: payload
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === 'error') {
-          if (res.message.indexOf('暗証番号') > -1) {
-            localStorage.removeItem('app_pin');
-            showPinDialog();
-          }
-          throw new Error(res.message);
-        }
-        return res.data;
-      });
-    }
-
-    window.onload = function() {
-      if (!localStorage.getItem('app_pin')) {
-        showPinDialog();
-      } else {
-        initLoadData();
-      }
-    };
-
-    function showPinDialog() {
-      const overlay = document.getElementById('pin-dialog-overlay');
-      const input = document.getElementById('pin-input');
-      input.value = '';
-      overlay.style.display = 'flex';
-      
-      document.getElementById('btn-pin-submit').onclick = function() {
-        const val = input.value.trim();
-        if (!val) {
-          showMsgBox('暗証番号を入力してください', false);
-          return;
-        }
-        localStorage.setItem('app_pin', val);
-        overlay.style.display = 'none';
-        initLoadData();
-      };
-    }
-
-    function initLoadData() {
-      document.getElementById('tab-attr').innerHTML = "読み込み中...";
-      callGasApi('getMasterData', { isInit: true })
-        .then(data => {
-          localData = data;
-          checkStaffRegistration();
-          renderAll();
-        })
-        .catch(err => {
-          document.getElementById('tab-attr').innerHTML = "データの読み込みに失敗しました。";
-          showMsgBox(err.message || '通信エラーが発生しました', false);
-        });
-    }
-
-    function resetMyStaffInfo() {
-      showMsgBox("現在の担当者情報（セクションと名前）をリセットして、再登録しますか？", true, 
-        () => {
-          localStorage.removeItem('staff_section');
-          localStorage.removeItem('staff_name');
-          localStorage.removeItem('staff_registered_time');
-          checkStaffRegistration();
-        }
-      );
-    }
-
-    function checkStaffRegistration() {
-      const resetTime = localData.staffResetTime || 0;
-      const registeredTime = Number(localStorage.getItem('staff_registered_time')) || 0;
-      
-      if (resetTime > registeredTime) {
-        localStorage.removeItem('staff_section');
-        localStorage.removeItem('staff_name');
-      }
-
-      if (!localStorage.getItem('staff_name') || !localStorage.getItem('staff_section')) {
-        const sel = document.getElementById('staff-section');
-        document.getElementById('staff-name').value = ''; 
-        sel.innerHTML = '<option value="">選択してください</option>' + (localData.staffSections || []).map(s => `<option value="${s}">${s}</option>`).join('');
-        
-        document.getElementById('staff-dialog-overlay').style.display = 'flex';
-        
-        document.getElementById('btn-staff-register').onclick = function() {
-          const section = document.getElementById('staff-section').value;
-          const name = document.getElementById('staff-name').value.trim();
-          if (!section || !name) {
-            showMsgBox('セクションと名前を入力してください', false);
-            return;
-          }
-          localStorage.setItem('staff_section', section);
-          localStorage.setItem('staff_name', name);
-          localStorage.setItem('staff_registered_time', Date.now());
-          document.getElementById('staff-dialog-overlay').style.display = 'none';
-          
-          callGasApi('registerStaff', { section, name }).catch(() => {});
-        };
-      }
-    }
-
-    function getStaffInfo() {
-      const sec = localStorage.getItem('staff_section') || '不明';
-      const name = localStorage.getItem('staff_name') || '不明';
-      return `【${sec}/${name}】`;
-    }
+    let currentData = { isEnded: false, isRainMode: false, isEnqueteOn: false };
 
     function showMsgBox(msg, isConfirm, onYes, onNo) {
       const overlay = document.getElementById('custom-dialog-overlay');
@@ -341,256 +298,161 @@
       overlay.style.display = 'flex';
     }
 
-    function switchTab(tabId) {
-      ['attr', 'craft', 'shop', 'stage'].forEach(id => {
-        document.getElementById('tab-btn-' + id).classList.remove('active');
-        document.getElementById('tab-' + id).classList.remove('active');
+    function callGasApi(action, params = {}) {
+      // スタッフ画面(app_pin)と記憶が混ざらないよう、管理画面専用のキー(admin_pin)を使用
+      const pin = localStorage.getItem('admin_pin') || '';
+      const payload = JSON.stringify({ action, pin, ...params });
+      return fetch(GAS_URL, {
+        method: 'POST',
+        body: payload
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === 'error') {
+          if (res.message.indexOf('暗証番号') > -1) {
+            localStorage.removeItem('admin_pin');
+            showPinDialog();
+          }
+          throw new Error(res.message);
+        }
+        return res.data;
       });
-      document.getElementById('tab-btn-' + tabId).classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
     }
 
-    function getOverlay(isCanceled) {
-      if (localData.isRainMode && isCanceled) return `<div class="blackout-overlay"></div>`;
-      return '';
-    }
-    
-    function getUpdateStr(timeStr) {
-      return timeStr ? `<span class="update-time">🕒${timeStr}</span>` : '';
-    }
-
-    function renderAll() { renderAttr(); renderCraft(); renderShop(); renderStage(); }
-
-    function renderAttr() {
-      document.getElementById('tab-attr').innerHTML = localData.attractions.map((a, i) => `
-        <div class="blackout-wrapper">
-          ${getOverlay(a.isRainCanceled)}
-          <div class="card">
-            <div class="card-title"><span>${a.category} - ${a.name}</span> ${getUpdateStr(a.updatedAt)}</div>
-            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
-              <div class="controls-inline">
-                <input class="input-val" type="text" value="${a.wait}" onchange="setVal('attraction', ${i}, 'wait', this.value)">
-                <span class="unit">分待ち</span>
-                <button class="btn-close ${a.isClosed ? 'closed' : 'open'}" onclick="toggleClose('attraction', ${i})">${a.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
-              </div>
-              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 0)">0分(空)</button>
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 5)">5分</button>
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 10)">10分</button>
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 15)">15分</button>
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 20)">20分</button>
-                <button class="btn-toggle" onclick="setVal('attraction', ${i}, 'wait', 30)">30分</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderCraft() {
-      document.getElementById('tab-craft').innerHTML = localData.crafts.map((c, i) => {
-        let timesHtml = c.times.map((t, tIndex) => {
-          const isCurrent = t.status === '開催中';
-          const isPreparing = t.status === '準備中';
-          return `
-          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <button class="stage-btn ${isCurrent ? 'active' : ''}" style="margin-bottom: 0;" onclick="toggleCraftTime(${i}, ${tIndex}, '開催中')">
-              <span>${t.time}</span>
-              ${isCurrent ? '<span>◀ 開催中</span>' : ''}
-            </button>
-            <button class="stage-btn ${isPreparing ? 'active-prep' : ''}" style="margin-bottom: 0; width: auto; padding: 15px; white-space: nowrap; flex-shrink: 0;" onclick="toggleCraftTime(${i}, ${tIndex}, '準備中')">
-              ${isPreparing ? '準備中(解除)' : '準備中'}
-            </button>
-          </div>
-          `;
-        }).join('');
-
-        return `
-        <div class="blackout-wrapper">
-          ${getOverlay(c.isRainCanceled)}
-          <div class="card">
-            <div class="card-title"><span>${c.name}</span> ${getUpdateStr(c.updatedAt)}</div>
-            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
-              <div class="controls-inline">
-                <input class="input-val" type="text" value="${c.wait}" onchange="setVal('craft', ${i}, 'wait', this.value)">
-                <span class="unit">分待ち</span>
-                <button class="btn-close ${c.isClosed ? 'closed' : 'open'}" onclick="toggleClose('craft', ${i})">${c.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
-              </div>
-              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 0)">0分(空)</button>
-                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 15)">15分</button>
-                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 20)">20分</button>
-                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 30)">30分</button>
-                <button class="btn-toggle" onclick="setVal('craft', ${i}, 'wait', 40)">40分</button>
-              </div>
-            </div>
-            ${timesHtml ? `<div style="border-top:1px solid #eee; padding-top:15px;">${timesHtml}</div>` : ''}
-          </div>
-        </div>
-      `}).join('');
-    }
-
-    function renderShop() {
-      document.getElementById('tab-shop').innerHTML = localData.shops.map((shop, sIndex) => {
-        let itemsHtml = shop.items.map((item, iIndex) => {
-          const regVal = item.regularPrice;
-          const regAmt = item.regularAmount;
-          const saleAmt = item.saleAmount;
-          const u = item.unit;
-          return `
-          <div class="shop-item-row">
-            <div class="shop-item-name">${item.name}</div>
-            <div class="shop-item-controls">
-              <div class="price-input-group">
-                <span style="font-size:12px; color:#555;">定価</span>
-                <input class="input-val" style="width:60px;" type="text" value="${regVal}" placeholder="円" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'regularPrice', this.value)">
-                <span style="font-size:12px; color:#555;">円 /</span>
-                <input class="input-val" style="width:45px;" type="text" value="${regAmt}" placeholder="${u}" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'regularAmount', this.value)">
-                <span style="font-size:12px; color:#555;">${u}</span>
-              </div>
-              <div class="price-input-group">
-                <span style="font-size:12px; color:#e74c3c; font-weight:bold;">セール</span>
-                <input class="input-val" style="width:45px; color:#e74c3c; border-color:#e74c3c;" type="text" value="${saleAmt}" placeholder="${u}" onchange="handlePriceChange(${sIndex}, ${iIndex}, 'saleAmount', this.value)">
-                <span style="font-size:12px; color:#e74c3c; font-weight:bold;">${u}</span>
-              </div>
-              <button class="btn-toggle ${item.isSoldOut ? 'active-soldout' : ''}" onclick="updateShopSoldOut(${sIndex}, ${iIndex}, ${!item.isSoldOut})">売切</button>
-            </div>
-          </div>
-        `}).join('');
-        return `
-          <div class="blackout-wrapper">
-            ${getOverlay(shop.isRainCanceled)}
-            <div class="card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div class="card-title" style="margin-bottom:0; font-size:18px;">${shop.name} ${getUpdateStr(shop.updatedAt)}</div>
-                <button class="btn-close ${shop.isClosed ? 'closed' : 'open'}" style="width:auto; padding:8px 12px;" onclick="toggleShopClose(${sIndex})">${shop.isClosed ? '店舗受付終了(解除)' : '店舗を受付終了'}</button>
-              </div>
-              <div style="border-top:1px solid #eee; padding-top:15px;">${itemsHtml}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderStage() {
-      document.getElementById('tab-stage').innerHTML = localData.stages.map((s, i) => `
-        <div class="blackout-wrapper">
-          ${getOverlay(s.isRainCanceled)}
-          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <button class="stage-btn ${s.isCurrent ? 'active' : ''}" style="margin-bottom: 0;" onclick="toggleStage(${i}, 'current')">
-              <span>${s.time} | ${s.name} ${getUpdateStr(s.updatedAt)}</span>
-              ${s.isCurrent ? '<span>◀ 演奏中</span>' : ''}
-            </button>
-            <button class="stage-btn ${s.isPreparing ? 'active-prep' : ''}" style="margin-bottom: 0; width: auto; padding: 15px; white-space: nowrap; flex-shrink: 0;" onclick="toggleStage(${i}, 'preparing')">
-              ${s.isPreparing ? '準備中(解除)' : '準備中'}
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function handlePriceChange(sIndex, iIndex, key, val) {
-      const shop = localData.shops[sIndex]; const item = shop.items[iIndex];
-      let finalVal = String(val).trim();
-      if (finalVal !== '-') {
-        finalVal = finalVal === '' ? 0 : Number(finalVal);
-        if (isNaN(finalVal) || finalVal < 0) finalVal = 0;
-      }
-
-      if (key === 'saleAmount' && finalVal > 0 && finalVal !== '-' && (!item.regularPrice || item.regularPrice <= 0 || item.regularPrice === '-' || !item.regularAmount || item.regularAmount <= 0 || item.regularAmount === '-')) {
-        showMsgBox("定価と定価個数を入力してください", false, () => { renderShop(); }); 
-        return;
-      }
-      if (key === 'regularPrice' && finalVal === 0) {
-        item.regularPrice = 0; item.regularAmount = 0; item.saleAmount = 0; sendShopData(shop.name, item.name, { regularPrice: 0, regularAmount: 0, saleAmount: 0 });
+    window.onload = function() {
+      if (!localStorage.getItem('admin_pin')) {
+        showPinDialog();
       } else {
-        item[key] = finalVal; let dataObj = {}; dataObj[key] = finalVal; sendShopData(shop.name, item.name, dataObj);
+        fetchAdminData();
       }
-      renderShop();
-    }
-    
-    function updateShopSoldOut(sIndex, iIndex, isSoldOutVal) {
-      const shop = localData.shops[sIndex]; const item = shop.items[iIndex]; item.isSoldOut = isSoldOutVal; renderShop(); sendShopData(shop.name, item.name, { isSoldOut: isSoldOutVal });
-    }
-    
-    function sendShopData(shopName, itemName, dataObj) {
-      callGasApi('updateShopData', { shopName, itemName, dataObj, staffInfo: getStaffInfo() })
-        .catch(() => { showMsgBox('エラーが発生しました', false); });
-    }
-    
-    function toggleShopClose(sIndex) {
-      const shop = localData.shops[sIndex]; const oldVal = shop.isClosed; shop.isClosed = !oldVal; renderShop();
-      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isClosed: shop.isClosed }, staffInfo: getStaffInfo() })
-        .catch(() => { shop.isClosed = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
-    }
-    
-    function setVal(type, index, key, newVal) {
-      let list = type === 'attraction' ? localData.attractions : localData.crafts;
-      
-      let finalVal = String(newVal).trim();
-      if (finalVal !== '-') {
-        finalVal = Number(finalVal);
-        if (isNaN(finalVal) || finalVal < 0) finalVal = 0;
-      }
-      
-      const oldVal = list[index][key]; 
-      list[index][key] = finalVal; 
-      type === 'attraction' ? renderAttr() : renderCraft();
-      
-      let dataObj = {}; dataObj[key] = finalVal;
-      callGasApi('updateDataObj', { type, name: list[index].name, dataObj, staffInfo: getStaffInfo() })
-        .catch(() => { 
-          list[index][key] = oldVal; 
-          type === 'attraction' ? renderAttr() : renderCraft(); 
-          showMsgBox('エラーが発生しました', false); 
-        });
-    }
-    
-    function toggleClose(type, index) {
-      let list = type === 'attraction' ? localData.attractions : localData.crafts;
-      const oldVal = list[index].isClosed; list[index].isClosed = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
-      callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isClosed: !oldVal }, staffInfo: getStaffInfo() })
-        .catch(() => { list[index].isClosed = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
-    }
-    
-    function toggleStage(index, type) {
-      const oldStages = JSON.parse(JSON.stringify(localData.stages));
-      const targetKey = type === 'current' ? 'isCurrent' : 'isPreparing';
-      const targetState = !localData.stages[index][targetKey];
-      
-      if (targetState) {
-        localData.stages.forEach(s => { s.isCurrent = false; s.isPreparing = false; });
-        localData.stages[index][targetKey] = true;
-      } else {
-        localData.stages[index][targetKey] = false;
-      }
-      renderStage();
+    };
 
-      callGasApi('toggleStageState', { name: localData.stages[index].name, type, staffInfo: getStaffInfo() })
-        .catch(() => { 
-          localData.stages = oldStages; 
-          renderStage(); 
-          showMsgBox('エラーが発生しました', false); 
+    function showPinDialog() {
+      const overlay = document.getElementById('pin-dialog-overlay');
+      const input = document.getElementById('pin-input');
+      const submitBtn = document.getElementById('btn-pin-submit');
+      input.value = '';
+      overlay.style.display = 'flex';
+      
+      submitBtn.onclick = function() {
+        const val = input.value.trim();
+        if (!val) {
+          showMsgBox('暗証番号を入力してください', false);
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.innerText = '確認中...';
+        localStorage.setItem('admin_pin', val);
+        
+        // 設定シートのF1セルと照合してから画面を開く
+        callGasApi('verifyPin')
+          .then(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '認証する';
+            overlay.style.display = 'none';
+            fetchAdminData();
+          })
+          .catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '認証する';
+            localStorage.removeItem('admin_pin');
+            showMsgBox(err.message || '暗証番号が正しくありません', false);
+          });
+      };
+    }
+
+    function fetchAdminData() {
+      callGasApi('getAdminData')
+        .then(updateBtnUI)
+        .catch(err => {
+          showMsgBox(err.message || "データの取得に失敗しました", false);
         });
     }
 
-    function toggleCraftTime(cIndex, tIndex, type) {
-      const oldCrafts = JSON.parse(JSON.stringify(localData.crafts));
-      const targetTime = localData.crafts[cIndex].times[tIndex];
-      const currentState = targetTime.status;
-      const newState = currentState === type ? '' : type;
+    function getTargetUrl(page) {
+      if (page === 'input') {
+        return new URL('./Input.html', window.location.href).href;
+      }
+      return GAS_URL + "?p=" + page;
+    }
 
-      localData.crafts[cIndex].times.forEach(t => t.status = '');
-      targetTime.status = newState;
-      
-      renderCraft();
+    function openPage(page) {
+      window.open(getTargetUrl(page), "_blank");
+    }
 
-      callGasApi('toggleCraftTimeState', { craftName: localData.crafts[cIndex].name, timeIndex: tIndex, targetStatus: newState, staffInfo: getStaffInfo() })
-        .catch(() => { 
-          localData.crafts = oldCrafts; 
-          renderCraft(); 
-          showMsgBox('エラーが発生しました', false); 
+    function copyUrl(page) {
+      const url = getTargetUrl(page);
+      navigator.clipboard.writeText(url).then(() => showMsgBox("URLをコピーしました:\n" + url, false));
+    }
+
+    function toggleEnd(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isEnded: status });
+      callGasApi('setEventEnd', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+    function toggleRain(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isRainMode: status });
+      callGasApi('setRainMode', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+    function toggleEnquete(status) {
+      let oldData = currentData; updateBtnUI({ ...currentData, isEnqueteOn: status });
+      callGasApi('setEnquete', { status }).catch(() => { showMsgBox("更新に失敗しました", false); updateBtnUI(oldData); });
+    }
+
+    function resetEnquete(type) {
+      const msg = type === 'full' ? "「回答済み」の方を含め、すべての来場者のスマホでポップアップが再表示されるようになります。\n本当によろしいですか？" : "「×(閉じる)」を押して待機中の方のスマホで、強制的にポップアップが再表示されるようになります。\nよろしいですか？";
+      showMsgBox(msg, true, () => {
+        callGasApi('resetEnquetePopup', { type }).then(() => {
+          showMsgBox("リセット信号を送信しました。\n来場者のスマホが数十秒以内に情報を受信し、状態がリセットされます。", false);
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
         });
+      });
+    }
+
+    function resetStaff() {
+      showMsgBox("現在入力画面を開いているスタッフも含め、次回操作時（画面更新時）に名前の再登録が求められるようになります。\n本当によろしいですか？", true, () => {
+        callGasApi('resetStaffInfo').then(() => {
+          showMsgBox("リセット信号を送信しました。", false);
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
+        });
+      });
+    }
+
+    function resetStats() {
+      showMsgBox("アクセス統計、アンケートタップ数、リンククリック数のすべての数値を「0」に戻し、\nスマホ端末の「ユニーク数カウント」もリセット（全端末で再カウント可能に）します。\n\n※この操作は元に戻せません。本当によろしいですか？", true, () => {
+        callGasApi('resetStatistics').then(() => {
+          showMsgBox("統計データとユニーク数をリセットしました。", false);
+          fetchAdminData();
+        }).catch(() => {
+          showMsgBox("エラーが発生しました。", false);
+        });
+      });
+    }
+
+    function updateBtnUI(data) {
+      currentData = data;
+      document.getElementById('btn-end-off').className = "btn-status " + (data.isEnded ? "" : "active-off");
+      document.getElementById('btn-end-on').className = "btn-status " + (data.isEnded ? "active-on" : "");
+      document.getElementById('btn-rain-off').className = "btn-status " + (data.isRainMode ? "" : "active-off");
+      document.getElementById('btn-rain-on').className = "btn-status " + (data.isRainMode ? "active-rain" : "");
+      document.getElementById('btn-enq-off').className = "btn-status " + (data.isEnqueteOn ? "" : "active-off");
+      document.getElementById('btn-enq-on').className = "btn-status " + (data.isEnqueteOn ? "active-enq" : "");
+
+      if(data.stats) {
+        document.getElementById('stat-mobile').innerText = data.stats['スマホ画面アクセス'] || 0;
+        document.getElementById('stat-mobile-unique').innerText = data.stats['スマホ画面アクセス（端末数）'] || 0;
+        document.getElementById('stat-input').innerText = data.stats['スタッフ画面アクセス'] || 0;
+        document.getElementById('stat-enq').innerText = data.stats['アンケート回答タップ'] || 0;
+        document.getElementById('stat-enq-unique').innerText = data.stats['アンケート回答（端末数）'] || 0;
+      }
+      if(data.linkStats) {
+        if(data.linkStats.length === 0) {
+          document.getElementById('stat-links').innerHTML = "<li>リンクの登録がありません</li>";
+        } else {
+          document.getElementById('stat-links').innerHTML = data.linkStats.map(l => `<li><span>${l.title}</span><span style="font-weight:bold;">${l.count} 回</span></li>`).join('');
+        }
+      }
     }
   </script>
 </body>
