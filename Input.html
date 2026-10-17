@@ -50,6 +50,7 @@
     .btn-close { flex: 1; padding: 10px; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
     .btn-close.open { background: #eee; color: #333; }
     .btn-close.closed { background: #d32f2f; color: white; }
+    .btn-close.paused { background: #f39c12; color: white; }
     .stage-btn { width: 100%; text-align: left; padding: 15px; font-size: 16px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; background: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
     .stage-btn.active { background-color: #e74c3c; color: white; border-color: #e74c3c; }
     .stage-btn.active-prep { background-color: #f39c12; color: white; border-color: #f39c12; }
@@ -130,7 +131,7 @@
         </select>
       </div>
       <div style="margin-bottom: 20px;">
-        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">担当者名</label>
+        <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:5px;">担当者名（ニックネーム可）</label>
         <input type="text" id="staff-name" style="width:100%; padding:8px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;" placeholder="名前を入力">
       </div>
       <div class="custom-dialog-btns">
@@ -371,6 +372,7 @@
               <div class="controls-inline">
                 <input class="input-val" type="text" value="${a.wait}" onchange="setVal('attraction', ${i}, 'wait', this.value)">
                 <span class="unit">分待ち</span>
+                <button class="btn-close ${a.isPaused ? 'paused' : 'open'}" onclick="togglePause('attraction', ${i})">${a.isPaused ? '受付停止(解除)' : '受付停止'}</button>
                 <button class="btn-close ${a.isClosed ? 'closed' : 'open'}" onclick="toggleClose('attraction', ${i})">${a.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
               </div>
               <div style="display: flex; gap: 5px; flex-wrap: wrap;">
@@ -414,6 +416,7 @@
               <div class="controls-inline">
                 <input class="input-val" type="text" value="${c.wait}" onchange="setVal('craft', ${i}, 'wait', this.value)">
                 <span class="unit">分待ち</span>
+                <button class="btn-close ${c.isPaused ? 'paused' : 'open'}" onclick="togglePause('craft', ${i})">${c.isPaused ? '受付停止(解除)' : '受付停止'}</button>
                 <button class="btn-close ${c.isClosed ? 'closed' : 'open'}" onclick="toggleClose('craft', ${i})">${c.isClosed ? '受付終了(解除)' : '受付終了にする'}</button>
               </div>
               <div style="display: flex; gap: 5px; flex-wrap: wrap;">
@@ -461,9 +464,12 @@
           <div class="blackout-wrapper">
             ${getOverlay(shop.isRainCanceled)}
             <div class="card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                 <div class="card-title" style="margin-bottom:0; font-size:18px;">${shop.name} ${getUpdateStr(shop.updatedAt)}</div>
-                <button class="btn-close ${shop.isClosed ? 'closed' : 'open'}" style="width:auto; padding:8px 12px;" onclick="toggleShopClose(${sIndex})">${shop.isClosed ? '店舗受付終了(解除)' : '店舗を受付終了'}</button>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn-close ${shop.isPaused ? 'paused' : 'open'}" style="width:auto; padding:8px 12px;" onclick="toggleShopPause(${sIndex})">${shop.isPaused ? '受付停止(解除)' : '受付停止'}</button>
+                  <button class="btn-close ${shop.isClosed ? 'closed' : 'open'}" style="width:auto; padding:8px 12px;" onclick="toggleShopClose(${sIndex})">${shop.isClosed ? '店舗受付終了(解除)' : '店舗を受付終了'}</button>
+                </div>
               </div>
               <div style="border-top:1px solid #eee; padding-top:15px;">${itemsHtml}</div>
             </div>
@@ -523,6 +529,12 @@
       callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isClosed: shop.isClosed }, staffInfo: getStaffInfo() })
         .catch(() => { shop.isClosed = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
     }
+
+    function toggleShopPause(sIndex) {
+      const shop = localData.shops[sIndex]; const oldVal = shop.isPaused; shop.isPaused = !oldVal; renderShop();
+      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isPaused: shop.isPaused }, staffInfo: getStaffInfo() })
+        .catch(() => { shop.isPaused = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
+    }
     
     function setVal(type, index, key, newVal) {
       let list = type === 'attraction' ? localData.attractions : localData.crafts;
@@ -551,6 +563,13 @@
       const oldVal = list[index].isClosed; list[index].isClosed = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
       callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isClosed: !oldVal }, staffInfo: getStaffInfo() })
         .catch(() => { list[index].isClosed = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
+    }
+
+    function togglePause(type, index) {
+      let list = type === 'attraction' ? localData.attractions : localData.crafts;
+      const oldVal = list[index].isPaused; list[index].isPaused = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
+      callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isPaused: !oldVal }, staffInfo: getStaffInfo() })
+        .catch(() => { list[index].isPaused = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
     }
     
     function toggleStage(index, type) {
