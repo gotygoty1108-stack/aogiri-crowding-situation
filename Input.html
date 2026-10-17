@@ -525,15 +525,33 @@
     }
     
     function toggleShopClose(sIndex) {
-      const shop = localData.shops[sIndex]; const oldVal = shop.isClosed; shop.isClosed = !oldVal; renderShop();
-      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isClosed: shop.isClosed }, staffInfo: getStaffInfo() })
-        .catch(() => { shop.isClosed = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
+      const shop = localData.shops[sIndex]; 
+      const oldClosed = shop.isClosed; 
+      const oldPaused = shop.isPaused;
+      shop.isClosed = !oldClosed; 
+      let dataObj = { isClosed: shop.isClosed };
+      if (shop.isClosed) {
+        shop.isPaused = false;
+        dataObj.isPaused = false;
+      }
+      renderShop();
+      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { shop.isClosed = oldClosed; shop.isPaused = oldPaused; renderShop(); showMsgBox('エラーが発生しました', false); });
     }
 
     function toggleShopPause(sIndex) {
-      const shop = localData.shops[sIndex]; const oldVal = shop.isPaused; shop.isPaused = !oldVal; renderShop();
-      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj: { isPaused: shop.isPaused }, staffInfo: getStaffInfo() })
-        .catch(() => { shop.isPaused = oldVal; renderShop(); showMsgBox('エラーが発生しました', false); });
+      const shop = localData.shops[sIndex]; 
+      const oldPaused = shop.isPaused; 
+      const oldClosed = shop.isClosed;
+      shop.isPaused = !oldPaused; 
+      let dataObj = { isPaused: shop.isPaused };
+      if (shop.isPaused) {
+        shop.isClosed = false;
+        dataObj.isClosed = false;
+      }
+      renderShop();
+      callGasApi('updateShopData', { shopName: shop.name, itemName: null, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { shop.isPaused = oldPaused; shop.isClosed = oldClosed; renderShop(); showMsgBox('エラーが発生しました', false); });
     }
     
     function setVal(type, index, key, newVal) {
@@ -560,16 +578,32 @@
     
     function toggleClose(type, index) {
       let list = type === 'attraction' ? localData.attractions : localData.crafts;
-      const oldVal = list[index].isClosed; list[index].isClosed = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
-      callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isClosed: !oldVal }, staffInfo: getStaffInfo() })
-        .catch(() => { list[index].isClosed = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
+      const oldClosed = list[index].isClosed; 
+      const oldPaused = list[index].isPaused;
+      list[index].isClosed = !oldClosed; 
+      let dataObj = { isClosed: list[index].isClosed };
+      if (list[index].isClosed) {
+        list[index].isPaused = false;
+        dataObj.isPaused = false;
+      }
+      type === 'attraction' ? renderAttr() : renderCraft();
+      callGasApi('updateDataObj', { type, name: list[index].name, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { list[index].isClosed = oldClosed; list[index].isPaused = oldPaused; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
     }
 
     function togglePause(type, index) {
       let list = type === 'attraction' ? localData.attractions : localData.crafts;
-      const oldVal = list[index].isPaused; list[index].isPaused = !oldVal; type === 'attraction' ? renderAttr() : renderCraft();
-      callGasApi('updateDataObj', { type, name: list[index].name, dataObj: { isPaused: !oldVal }, staffInfo: getStaffInfo() })
-        .catch(() => { list[index].isPaused = oldVal; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
+      const oldPaused = list[index].isPaused; 
+      const oldClosed = list[index].isClosed;
+      list[index].isPaused = !oldPaused; 
+      let dataObj = { isPaused: list[index].isPaused };
+      if (list[index].isPaused) {
+        list[index].isClosed = false;
+        dataObj.isClosed = false;
+      }
+      type === 'attraction' ? renderAttr() : renderCraft();
+      callGasApi('updateDataObj', { type, name: list[index].name, dataObj, staffInfo: getStaffInfo() })
+        .catch(() => { list[index].isPaused = oldPaused; list[index].isClosed = oldClosed; type === 'attraction' ? renderAttr() : renderCraft(); showMsgBox('エラーが発生しました', false); });
     }
     
     function toggleStage(index, type) {
